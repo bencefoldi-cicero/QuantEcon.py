@@ -10,7 +10,6 @@ https://lectures.quantecon.org/py/linear_models.html
 
 from textwrap import dedent
 import numpy as np
-from numpy.random import multivariate_normal
 from scipy.linalg import solve
 from .matrix_eqn import solve_discrete_lyapunov
 from numba import jit
@@ -186,7 +185,8 @@ class LinearStateSpace:
         """
         random_state = check_random_state(random_state)
 
-        x0 = multivariate_normal(self.mu_0.flatten(), self.Sigma_0)
+        x0 = random_state.multivariate_normal(self.mu_0.flatten(),
+                                              self.Sigma_0)
         w = random_state.randn(self.m, ts_length-1)
         v = self.C.dot(w)  # Multiply each w_t by C to get v_t = C w_t
         # == simulate time series == #
@@ -245,7 +245,7 @@ class LinearStateSpace:
     def moment_sequence(self):
         r"""
         Create a generator to calculate the population mean and
-        variance-convariance matrix for both :math:`x_t` and :math:`y_t`
+        variance-covariance matrix for both :math:`x_t` and :math:`y_t`
         starting at the initial condition (self.mu_0, self.Sigma_0).
         Each iteration produces a 4-tuple of items (mu_x, mu_y, Sigma_x,
         Sigma_y) for the next period.
@@ -447,8 +447,8 @@ class LinearStateSpace:
         A_diag = np.diag(A)
         num_const = 0
         for idx in range(n):
-            if (A_diag[idx] == 1) and (C[idx, :] == 0).all() \
-            	and np.linalg.norm(A[idx, :]) == 1:
+            if (A_diag[idx] == 1) and (C[idx, :] == 0).all() and \
+                    np.linalg.norm(A[idx, :]) == 1:
                 sorted_idx.insert(0, idx)
                 num_const += 1
             else:
